@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package agennext.foundation.v1;
 
+import "buf/validate/validate.proto";
 import "google/protobuf/timestamp.proto";
 
 // SourceType classifies the origin of a piece of evidence.
@@ -22,10 +23,12 @@ enum SourceType {
 message Freshness {
   // The point in time the source is considered accurate as of.
   google.protobuf.Timestamp as_of = 1;
-  // Staleness budget. 0 means no freshness constraint.
-  int64 max_age_seconds = 2;
+  // Staleness budget in seconds. Unset means no freshness constraint;
+  // `optional` lets consumers distinguish "no budget" from a budget of 0.
+  optional int64 max_age_seconds = 2 [(buf.validate.field).int64.gte = 0];
   // Whether the source is currently considered stale against its budget.
-  bool stale = 3;
+  // Unset means staleness has not been evaluated.
+  optional bool stale = 3;
 }
 
 // Source is the traceable origin of evidence.
@@ -37,7 +40,7 @@ message Source {
   string id = 1;
   SourceType type = 2;
   // Canonical locator: URL, DOI, arXiv id, file path, etc.
-  string uri = 3;
+  string uri = 3 [(buf.validate.field).string.min_len = 1];
   string title = 4;
   string publisher = 5;
   google.protobuf.Timestamp published_at = 6;

@@ -2,7 +2,21 @@ syntax = "proto3";
 
 package agennext.foundation.v1;
 
+import "buf/validate/validate.proto";
 import "google/protobuf/timestamp.proto";
+
+// Money is an exact monetary amount. It mirrors google.type.Money but is kept
+// local to avoid an external dependency. Never use a floating-point type for
+// currency: nanos are billionths (10^-9) of a unit, so $1.25 is
+// {units: 1, nanos: 250000000}.
+message Money {
+  // ISO 4217 currency code, e.g. "USD".
+  string currency_code = 1;
+  // Whole units of the amount.
+  int64 units = 2;
+  // Fractional part in nanos; must have the same sign as units.
+  int32 nanos = 3 [(buf.validate.field).int32 = {gte: -999999999, lte: 999999999}];
+}
 
 // The CLEAR framework evaluates a system across five dimensions:
 // Cost, Latency, Efficacy, Assurance, Reliability. Each dimension is a message
@@ -10,35 +24,37 @@ import "google/protobuf/timestamp.proto";
 
 // Cost: tokens consumed and monetary spend.
 message CostMetric {
-  int64 input_tokens = 1;
-  int64 output_tokens = 2;
-  double usd = 3;
+  optional int64 input_tokens = 1 [(buf.validate.field).int64.gte = 0];
+  optional int64 output_tokens = 2 [(buf.validate.field).int64.gte = 0];
+  Money cost = 3;
 }
 
 // Latency: execution time and SLA compliance.
 message LatencyMetric {
-  double total_ms = 1;
-  double sla_ms = 2;
-  bool sla_met = 3;
+  double total_ms = 1 [(buf.validate.field).double.gte = 0];
+  // Target SLA; unset means no SLA defined for this run.
+  optional double sla_ms = 2 [(buf.validate.field).double.gte = 0];
+  // Whether the SLA was met; unset means not evaluated.
+  optional bool sla_met = 3;
 }
 
 // Efficacy: task success and domain-graded quality (0..1).
 message EfficacyMetric {
-  double task_success_rate = 1;
-  double grade = 2;
+  double task_success_rate = 1 [(buf.validate.field).double = {gte: 0, lte: 1}];
+  double grade = 2 [(buf.validate.field).double = {gte: 0, lte: 1}];
 }
 
 // Assurance: safety, compliance, and security resistance (each 0..1).
 message AssuranceMetric {
-  double safety_score = 1;
-  double compliance_score = 2;
-  double security_resistance = 3;
+  double safety_score = 1 [(buf.validate.field).double = {gte: 0, lte: 1}];
+  double compliance_score = 2 [(buf.validate.field).double = {gte: 0, lte: 1}];
+  double security_resistance = 3 [(buf.validate.field).double = {gte: 0, lte: 1}];
 }
 
 // Reliability: stability across repeated runs (0..1, higher is more stable).
 message ReliabilityMetric {
-  int32 runs = 1;
-  double stability = 2;
+  int32 runs = 1 [(buf.validate.field).int32.gte = 0];
+  double stability = 2 [(buf.validate.field).double = {gte: 0, lte: 1}];
 }
 
 // ClearScore aggregates the five CLEAR dimensions for one system or run.

@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package agennext.foundation.v1;
 
+import "buf/validate/validate.proto";
 import "google/protobuf/timestamp.proto";
 
 // DecisionType is the class of strategic decision being made.
@@ -34,6 +35,14 @@ message Alternative {
 // `synthesis_ids` or `evidence_ids` must be populated so the decision is
 // traceable back to sources.
 message Decision {
+  // Core principle, enforced: a decision must be traceable to at least one
+  // synthesis or piece of evidence.
+  option (buf.validate.message).cel = {
+    id: "decision.grounded",
+    message: "a decision must cite at least one synthesis_id or evidence_id",
+    expression: "size(this.synthesis_ids) > 0 || size(this.evidence_ids) > 0"
+  };
+
   string id = 1;
   DecisionType type = 2;
   string question = 3;
