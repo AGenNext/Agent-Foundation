@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package agennext.foundation.v1;
 
+// Target repo: Agent-Research
+
 import "agennext/foundation/v1/provenance.proto";
 import "buf/validate/validate.proto";
 import "google/protobuf/timestamp.proto";

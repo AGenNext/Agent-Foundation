@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package agennext.foundation.v1;
 
+// Target repos: shared by all (Agent-Research, Agent-Platform, Agent-Publications)
+
 import "google/protobuf/timestamp.proto";
 
 // Provenance aligns with the W3C PROV-O ontology. Attach it to any entity

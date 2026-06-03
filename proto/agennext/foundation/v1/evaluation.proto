@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package agennext.foundation.v1;
 
+// Target repos: Agent-Bench (CLEARBench), Agent-Research
+
 import "buf/validate/validate.proto";
 import "google/protobuf/timestamp.proto";
 
