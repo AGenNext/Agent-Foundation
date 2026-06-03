@@ -22,7 +22,7 @@ jobs:
         with:
           # Full history so `buf breaking` can diff against the base branch.
           fetch-depth: 0
-      - uses: bufbuild/buf-setup-action@v1
+      - uses: bufbuild/buf-setup-action@a47c93e0b1648d5651a065437926377d060baa99 # v1.50.0
       - name: Lint contracts
         run: buf lint
       - name: Check for breaking changes
