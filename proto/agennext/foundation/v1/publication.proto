@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package agennext.foundation.v1;
+
+import "google/protobuf/timestamp.proto";
+
+// PublicationType classifies a published result.
+enum PublicationType {
+  PUBLICATION_TYPE_UNSPECIFIED = 0;
+  PUBLICATION_TYPE_BENCHMARK_REPORT = 1;
+  PUBLICATION_TYPE_RESEARCH_NOTE = 2;
+  PUBLICATION_TYPE_THEORY_EVALUATION = 3;
+  PUBLICATION_TYPE_WHITEPAPER = 4;
+}
+
+// Publication is a published, citable result.
+//
+// It is the contract behind the Agent-Publications registry: the output of the
+// loop load theory -> test (benchmark) -> publish results. A publication links
+// back to the benchmark runs, theory, and evidence that produced its results so
+// the claim remains traceable after it leaves the system.
+message Publication {
+  string id = 1;
+  PublicationType type = 2;
+  string title = 3;
+  string abstract = 4;
+  // Rendered publication location (URL, DOI, object-store key, path).
+  string content_uri = 5;
+  // Result provenance: the benchmark runs whose metrics this publishes.
+  repeated string benchmark_run_ids = 6;
+  // The theory under evaluation, if any (references Theory.id).
+  string theory_id = 7;
+  // Supporting evidence (references Evidence.id).
+  repeated string evidence_ids = 8;
+  repeated string author_ids = 9;
+  repeated string tags = 10;
+  google.protobuf.Timestamp published_at = 11;
+}

@@ -1,0 +1,73 @@
+syntax = "proto3";
+
+package agennext.foundation.v1;
+
+import "google/protobuf/timestamp.proto";
+
+// The CLEAR framework evaluates a system across five dimensions:
+// Cost, Latency, Efficacy, Assurance, Reliability. Each dimension is a message
+// below, aggregated by ClearScore.
+
+// Cost: tokens consumed and monetary spend.
+message CostMetric {
+  int64 input_tokens = 1;
+  int64 output_tokens = 2;
+  double usd = 3;
+}
+
+// Latency: execution time and SLA compliance.
+message LatencyMetric {
+  double total_ms = 1;
+  double sla_ms = 2;
+  bool sla_met = 3;
+}
+
+// Efficacy: task success and domain-graded quality (0..1).
+message EfficacyMetric {
+  double task_success_rate = 1;
+  double grade = 2;
+}
+
+// Assurance: safety, compliance, and security resistance (each 0..1).
+message AssuranceMetric {
+  double safety_score = 1;
+  double compliance_score = 2;
+  double security_resistance = 3;
+}
+
+// Reliability: stability across repeated runs (0..1, higher is more stable).
+message ReliabilityMetric {
+  int32 runs = 1;
+  double stability = 2;
+}
+
+// ClearScore aggregates the five CLEAR dimensions for one system or run.
+message ClearScore {
+  CostMetric cost = 1;
+  LatencyMetric latency = 2;
+  EfficacyMetric efficacy = 3;
+  AssuranceMetric assurance = 4;
+  ReliabilityMetric reliability = 5;
+}
+
+// Trace is a single captured execution during a benchmark run.
+message Trace {
+  string id = 1;
+  string benchmark_id = 2;
+  string system_id = 3;
+  google.protobuf.Timestamp started_at = 4;
+  google.protobuf.Timestamp finished_at = 5;
+  ClearScore score = 6;
+}
+
+// BenchmarkRun aggregates traces into a report for one system.
+// This is the benchmark -> traces -> metrics -> report loop.
+message BenchmarkRun {
+  string id = 1;
+  // Vertical/benchmark name, e.g. "CLEARBench".
+  string name = 2;
+  string system_id = 3;
+  repeated string trace_ids = 4;
+  ClearScore aggregate = 5;
+  google.protobuf.Timestamp created_at = 6;
+}

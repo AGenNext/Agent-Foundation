@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package agennext.foundation.v1;
+
+import "google/protobuf/timestamp.proto";
+
+// DecisionType is the class of strategic decision being made.
+enum DecisionType {
+  DECISION_TYPE_UNSPECIFIED = 0;
+  DECISION_TYPE_PRODUCT = 1;
+  DECISION_TYPE_TECHNICAL = 2;
+  DECISION_TYPE_MARKET = 3;
+  DECISION_TYPE_ARCHITECTURE = 4;
+}
+
+// DecisionStatus tracks the lifecycle of a decision record.
+enum DecisionStatus {
+  DECISION_STATUS_UNSPECIFIED = 0;
+  DECISION_STATUS_PROPOSED = 1;
+  DECISION_STATUS_ACCEPTED = 2;
+  DECISION_STATUS_REJECTED = 3;
+  DECISION_STATUS_SUPERSEDED = 4;
+}
+
+// Alternative is an option that was considered and not chosen.
+message Alternative {
+  string summary = 1;
+  string rejected_reason = 2;
+}
+
+// Decision is a strategic choice grounded in evidence and synthesis.
+//
+// Core principle: "No strategic decision without evidence." At least one of
+// `synthesis_ids` or `evidence_ids` must be populated so the decision is
+// traceable back to sources.
+message Decision {
+  string id = 1;
+  DecisionType type = 2;
+  string question = 3;
+  string outcome = 4;
+  repeated string synthesis_ids = 5;
+  repeated string evidence_ids = 6;
+  repeated Alternative alternatives = 7;
+  DecisionStatus status = 8;
+  // Set when status is SUPERSEDED: the Decision.id that replaces this one.
+  string superseded_by = 9;
+  google.protobuf.Timestamp decided_at = 10;
+}

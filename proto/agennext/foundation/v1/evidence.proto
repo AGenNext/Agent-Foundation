@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package agennext.foundation.v1;
+
+import "google/protobuf/timestamp.proto";
+
+// Confidence expresses how strongly a claim is supported, normalized to 0..1.
+message Confidence {
+  double score = 1;
+  string rationale = 2;
+}
+
+// Evidence is a single claim grounded in one or more sources.
+//
+// Core principle: "No evidence without source." `source_ids` must be non-empty;
+// each id references a Source.id defined in source.proto.
+message Evidence {
+  string id = 1;
+  string claim = 2;
+  repeated string source_ids = 3;
+  Confidence confidence = 4;
+  repeated string tags = 5;
+  google.protobuf.Timestamp created_at = 6;
+}
+
+// Synthesis combines multiple pieces of evidence into a finding that answers a
+// research question. It is the bridge in the question -> evidence -> synthesis
+// -> decision loop.
+message Synthesis {
+  string id = 1;
+  string question = 2;
+  repeated string evidence_ids = 3;
+  string finding = 4;
+  Confidence confidence = 5;
+  google.protobuf.Timestamp created_at = 6;
+}

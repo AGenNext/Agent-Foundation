@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package agennext.foundation.v1;
+
+import "google/protobuf/timestamp.proto";
+
+// SourceType classifies the origin of a piece of evidence.
+enum SourceType {
+  SOURCE_TYPE_UNSPECIFIED = 0;
+  SOURCE_TYPE_ACADEMIC_PAPER = 1;
+  SOURCE_TYPE_WEB_PAGE = 2;
+  SOURCE_TYPE_DATASET = 3;
+  SOURCE_TYPE_CODE_REPOSITORY = 4;
+  SOURCE_TYPE_BENCHMARK = 5;
+  SOURCE_TYPE_INTERNAL_DOCUMENT = 6;
+  SOURCE_TYPE_HUMAN_EXPERT = 7;
+}
+
+// Freshness captures how current a source is relative to its use. A research
+// intelligence system must be able to reason about staleness, so freshness is
+// a first-class part of every source.
+message Freshness {
+  // The point in time the source is considered accurate as of.
+  google.protobuf.Timestamp as_of = 1;
+  // Staleness budget. 0 means no freshness constraint.
+  int64 max_age_seconds = 2;
+  // Whether the source is currently considered stale against its budget.
+  bool stale = 3;
+}
+
+// Source is the traceable origin of evidence.
+//
+// Core principle: "No evidence without source." Every Evidence message must
+// reference at least one Source so that any downstream synthesis, decision, or
+// artifact can be traced back to where it came from.
+message Source {
+  string id = 1;
+  SourceType type = 2;
+  // Canonical locator: URL, DOI, arXiv id, file path, etc.
+  string uri = 3;
+  string title = 4;
+  string publisher = 5;
+  google.protobuf.Timestamp published_at = 6;
+  google.protobuf.Timestamp retrieved_at = 7;
+  // Content hash for integrity verification and deduplication.
+  string content_hash = 8;
+  Freshness freshness = 9;
+}
