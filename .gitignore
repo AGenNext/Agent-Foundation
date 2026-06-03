@@ -1,18 +1,5 @@
-# Generated protobuf code
-/gen/
-
 # buf
 buf.lock
-
-# Python
-__pycache__/
-*.py[cod]
-.venv/
-*.egg-info/
-
-# Node / TypeScript
-node_modules/
-dist/
 
 # Editor / OS
 .DS_Store

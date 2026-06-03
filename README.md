@@ -13,8 +13,9 @@ so they can be shared across services written in any language.
   tied to SurrealDB, Postgres, or any other store. Persistence is the
   responsibility of each consuming service; Agent-Foundation only describes the
   shape of the data on the wire.
-- **Language-neutral.** Contracts are defined once in `.proto` and generated for
-  Python, TypeScript, and anything else `buf` supports.
+- **Language-neutral.** Contracts are defined once in `.proto`. This repo ships
+  the `.proto` source only — each consuming repo generates its own bindings
+  (Python, TypeScript, or anything else `buf`/`protoc` supports).
 - **Traceable by construction.** Evidence references sources, decisions
   reference evidence, artifacts and publications reference both. Nothing is
   asserted without provenance — _"No evidence without source. No strategic
@@ -44,8 +45,8 @@ Theory ──load──► BenchmarkRun + ClearScore ──test──► Publica
 
 ## Quick start
 
-This repo uses [`buf`](https://buf.build/docs/installation) to lint and generate
-code.
+This repo is **proto only**. It uses [`buf`](https://buf.build/docs/installation)
+to keep the contracts healthy; code generation happens in the consuming repos.
 
 ```bash
 # Lint the contracts
@@ -53,14 +54,10 @@ buf lint
 
 # Check for breaking changes against the previous commit
 buf breaking --against '.git#ref=HEAD~1'
-
-# Generate Python + TypeScript bindings into ./gen
-buf generate
 ```
 
-Generated code is written to `gen/` and is git-ignored; consumers generate from
-the `.proto` source (or pull a published Buf module) rather than vendoring the
-output.
+Consumers generate bindings from the `.proto` source (or pull a published Buf
+module) in their own repos, rather than vendoring generated code here.
 
 ## Versioning
 
