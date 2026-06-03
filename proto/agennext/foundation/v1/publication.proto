@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package agennext.foundation.v1;
 
+import "agennext/foundation/v1/provenance.proto";
 import "google/protobuf/timestamp.proto";
 
 // PublicationType classifies a published result.
@@ -11,6 +12,15 @@ enum PublicationType {
   PUBLICATION_TYPE_RESEARCH_NOTE = 2;
   PUBLICATION_TYPE_THEORY_EVALUATION = 3;
   PUBLICATION_TYPE_WHITEPAPER = 4;
+}
+
+// Author is a publication author, with optional ORCID for unambiguous identity
+// (CSL/ORCID alignment).
+message Author {
+  string id = 1;
+  string name = 2;
+  // ORCID iD, e.g. "0000-0002-1825-0097".
+  string orcid = 3;
 }
 
 // Publication is a published, citable result.
@@ -24,7 +34,7 @@ message Publication {
   PublicationType type = 2;
   string title = 3;
   string abstract = 4;
-  // Rendered publication location (URL, DOI, object-store key, path).
+  // Rendered publication location (URL, object-store key, path).
   string content_uri = 5;
   // Result provenance: the benchmark runs whose metrics this publishes.
   repeated string benchmark_run_ids = 6;
@@ -32,7 +42,10 @@ message Publication {
   string theory_id = 7;
   // Supporting evidence (references Evidence.id).
   repeated string evidence_ids = 8;
-  repeated string author_ids = 9;
+  repeated Author authors = 9;
   repeated string tags = 10;
   google.protobuf.Timestamp published_at = 11;
+  // Digital Object Identifier assigned on publication (CSL/DOI alignment).
+  string doi = 12;
+  Provenance provenance = 13;
 }

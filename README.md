@@ -31,9 +31,66 @@ so they can be shared across services written in any language.
 | `evaluation.proto` | `ClearScore` + CLEAR metrics, `Trace`, `BenchmarkRun` | Agent-Bench / CLEARBench |
 | `artifact.proto` | `Artifact`, `ArtifactType` | Agent-Platform |
 | `theory.proto` | `Theory`, `TheoryStatus` | Agent-Theories |
-| `publication.proto` | `Publication`, `PublicationType` | Agent-Publications |
+| `publication.proto` | `Publication`, `Author`, `PublicationType` | Agent-Publications |
+| `provenance.proto` | `Provenance` (W3C PROV-O) | all entities |
+| `agent.proto` | `Agent`, `AgentCard`, `ModelRouting`, `ToolBinding` | Agent-Platform |
+| `runtime.proto` | `RuntimeSpec`, `RuntimeKind`, `ResourceRequirements` | Agent-Platform / Agent-Cloud |
 
 All messages live in the `agennext.foundation.v1` package.
+
+Agent-Foundation only **defines** these contracts. **Agent-Platform implements
+and enforces** them at runtime; this repo carries no runtime or storage code.
+
+## Mental model
+
+Three planes, one contract package:
+
+```
+            ┌─────────────────────── CONTROL PLANE ───────────────────────┐
+            │  Agent ── AgentCard (A2A) ── ModelRouting (multi-LLM)        │
+            │    │           discover/call        primary + fallbacks      │
+            │    └── ToolBinding (MCP / OpenAPI / A2A)                      │
+            │    └── RuntimeSpec (k8s · serverless · wasm · dapr · edge)    │
+            └──────────────────────────────────────────────────────────────┘
+                                       │ runs
+            ┌─────────────────────── KNOWLEDGE PLANE ─────────────────────┐
+            │  Source ◄─ Retrieval(RAG) ◄─ Evidence ◄─ Synthesis ◄─ Decision │
+            │     every step carries Provenance (PROV-O) ── full lineage   │
+            └──────────────────────────────────────────────────────────────┘
+                                       │ produces
+            ┌─────────────────────── OUTPUT PLANE ────────────────────────┐
+            │  Theory ─test▶ BenchmarkRun + ClearScore ─publish▶ Publication │
+            │            (CLEAR: Cost·Latency·Efficacy·Assurance·Reliab.)   │
+            └──────────────────────────────────────────────────────────────┘
+```
+
+- **Control plane** — what an agent *is*: its card, models, tools, runtime.
+- **Knowledge plane** — what an agent *knows*, and where it came from.
+- **Output plane** — what an agent *produces*, and how it was evaluated.
+
+`Provenance` threads through all three so any output traces back to its sources.
+
+## Standards alignment
+
+These contracts are designed to interoperate with established standards rather
+than reinvent them.
+
+**Encoded in the contracts:**
+
+| Standard | Where |
+| --- | --- |
+| **W3C PROV-O** (provenance) | `Provenance` (`wasDerivedFrom` / `wasGeneratedBy` / `wasAttributedTo`) |
+| **OpenTelemetry GenAI** semconv | `Trace.model` / `Trace.provider`, `CostMetric` token fields |
+| **A2A** (Agent2Agent) | `AgentCard`, `AgentSkill`, `AgentCapabilities` |
+| **MCP** / **OpenAPI** | `ToolBinding.protocol` |
+| **CSL / DOI / ORCID** | `Source.doi`, `Publication.doi`, `Author.orcid` |
+| **OpenAI-compatible** multi-LLM | `ModelRouting`, `ModelRef.endpoint` |
+| Kubernetes / Knative / Dapr / WASM | `RuntimeSpec`, `RuntimeKind` |
+
+**Referenced, enforced by the runtime (Agent-Platform), not by these contracts:**
+NIST AI RMF · ISO/IEC 42001 · OWASP LLM Top 10 & MITRE ATLAS (graded into the
+CLEAR Assurance dimension) · SPIFFE/SPIRE (agent identity) · Open Policy Agent
+(governance) · CycloneDX AI-BOM (supply chain) · CloudEvents (event envelope).
 
 ### The research loop, as contracts
 

@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package agennext.foundation.v1;
+
+import "google/protobuf/timestamp.proto";
+
+// Provenance aligns with the W3C PROV-O ontology. Attach it to any entity
+// (evidence, synthesis, decision, artifact, publication) to record where it
+// came from, what produced it, and who is responsible — making lineage portable
+// and queryable across the ecosystem.
+message Provenance {
+  // PROV-O prov:wasDerivedFrom — ids of the entities this was derived from.
+  repeated string derived_from = 1;
+  // PROV-O prov:wasGeneratedBy — id of the activity/run that produced this.
+  string generated_by = 2;
+  // PROV-O prov:wasAttributedTo — id of the agent responsible for it.
+  string attributed_to = 3;
+  // PROV-O prov:generatedAtTime.
+  google.protobuf.Timestamp generated_at = 4;
+}

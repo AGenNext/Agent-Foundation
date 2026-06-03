@@ -74,6 +74,10 @@ message Trace {
   google.protobuf.Timestamp started_at = 4;
   google.protobuf.Timestamp finished_at = 5;
   ClearScore score = 6;
+  // OpenTelemetry GenAI semantic-convention fields:
+  // gen_ai.request.model and gen_ai.system (provider).
+  string model = 7;
+  string provider = 8;
 }
 
 // BenchmarkRun aggregates traces into a report for one system.

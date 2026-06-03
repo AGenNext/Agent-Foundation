@@ -15,6 +15,8 @@ enum SourceType {
   SOURCE_TYPE_BENCHMARK = 5;
   SOURCE_TYPE_INTERNAL_DOCUMENT = 6;
   SOURCE_TYPE_HUMAN_EXPERT = 7;
+  SOURCE_TYPE_VECTOR_STORE = 8;    // an embedding index queried via RAG
+  SOURCE_TYPE_RAG_RETRIEVAL = 9;   // a specific retrieval result set
 }
 
 // Freshness captures how current a source is relative to its use. A research
@@ -48,4 +50,28 @@ message Source {
   // Content hash for integrity verification and deduplication.
   string content_hash = 8;
   Freshness freshness = 9;
+  // Digital Object Identifier, when the source has one (CSL/DOI alignment).
+  string doi = 10;
+}
+
+// RetrievedChunk is one passage returned by a RAG retrieval, traceable to the
+// Source it came from.
+message RetrievedChunk {
+  // References Source.id of the underlying document.
+  string source_id = 1;
+  string content = 2;
+  // Similarity/relevance score, normalized 0..1.
+  double score = 3 [(buf.validate.field).double = {gte: 0, lte: 1}];
+}
+
+// Retrieval captures a RAG query and its results so any evidence grounded in
+// retrieval remains traceable: which index, which query, which chunks.
+message Retrieval {
+  string id = 1;
+  string query = 2;
+  // Vector store / index name that was queried.
+  string index = 3;
+  int32 top_k = 4 [(buf.validate.field).int32.gte = 0];
+  repeated RetrievedChunk chunks = 5;
+  google.protobuf.Timestamp retrieved_at = 6;
 }

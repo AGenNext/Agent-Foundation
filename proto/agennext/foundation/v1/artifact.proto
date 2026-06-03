@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package agennext.foundation.v1;
 
+import "agennext/foundation/v1/provenance.proto";
 import "google/protobuf/timestamp.proto";
 
 // ArtifactType enumerates the governed business outputs produced by the
@@ -28,4 +29,5 @@ message Artifact {
   // Agent or team id that produced the artifact.
   string produced_by = 7;
   google.protobuf.Timestamp created_at = 8;
+  Provenance provenance = 9;
 }

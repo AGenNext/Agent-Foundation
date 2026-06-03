@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package agennext.foundation.v1;
 
+import "agennext/foundation/v1/provenance.proto";
 import "buf/validate/validate.proto";
 import "google/protobuf/timestamp.proto";
 
@@ -22,6 +23,7 @@ message Evidence {
   Confidence confidence = 4;
   repeated string tags = 5;
   google.protobuf.Timestamp created_at = 6;
+  Provenance provenance = 7;
 }
 
 // Synthesis combines multiple pieces of evidence into a finding that answers a
@@ -34,4 +36,5 @@ message Synthesis {
   string finding = 4;
   Confidence confidence = 5;
   google.protobuf.Timestamp created_at = 6;
+  Provenance provenance = 7;
 }

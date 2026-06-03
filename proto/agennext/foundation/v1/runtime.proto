@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package agennext.foundation.v1;
+
+// RuntimeKind enumerates the execution substrates an agent can run on. The spec
+// is deliberately runtime-neutral: the same Agent can target any of these.
+enum RuntimeKind {
+  RUNTIME_KIND_UNSPECIFIED = 0;
+  RUNTIME_KIND_KUBERNETES = 1;   // pod/deployment on a cluster
+  RUNTIME_KIND_CONTAINER = 2;    // plain OCI container
+  RUNTIME_KIND_SERVERLESS = 3;   // Knative / Cloud Run / Lambda (scale-to-zero)
+  RUNTIME_KIND_WASM = 4;         // WebAssembly sandbox
+  RUNTIME_KIND_DAPR = 5;         // Dapr sidecar runtime
+  RUNTIME_KIND_PROCESS = 6;      // local OS process
+  RUNTIME_KIND_EDGE = 7;         // edge / on-device
+}
+
+// ResourceRequirements uses Kubernetes-style quantity strings so the same spec
+// is portable across runtimes (e.g. cpu "500m", memory "512Mi", gpu "1").
+message ResourceRequirements {
+  string cpu = 1;
+  string memory = 2;
+  string gpu = 3;
+}
+
+// RuntimeSpec describes where and how an agent executes, independent of any
+// single platform. A disposable, on-demand runtime sets ephemeral=true and
+// min_replicas=0 (scale-to-zero).
+message RuntimeSpec {
+  string id = 1;
+  RuntimeKind kind = 2;
+  // OCI image reference for container/kubernetes/serverless kinds.
+  string image = 3;
+  // Spun up per task and torn down afterward when true.
+  bool ephemeral = 4;
+  ResourceRequirements resources = 5;
+  // Runtime-specific settings, e.g. k8s namespace, knative concurrency.
+  map<string, string> config = 6;
+  // Autoscaling bounds; min_replicas=0 means scale-to-zero.
+  int32 min_replicas = 7;
+  int32 max_replicas = 8;
+}
