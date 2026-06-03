@@ -11,3 +11,4 @@ deleted from here. They are starting points, not the final home.
 | Folder | Destination repo |
 | --- | --- |
 | `agent-platform/` | `AGenNext/Agent-Platform` |
+| `agent-runtime/` | `AGenNext/Agent-Runtime` |
