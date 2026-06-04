@@ -8,15 +8,13 @@ This repository defines language-neutral contracts for the AGenNext agent ecosys
 
 Agent-Foundation does not implement commercial products, runtime behavior, storage systems, or user-facing applications. Those responsibilities belong in implementation and product repositories such as Agent-Platform, Agent-Builder, Agent-UI, Agent-Research, Agent-Bench, and related AGenNext repositories.
 
-## Design principles
+## Mission
 
-- **Community welfare first.** The foundation exists to support responsible public understanding, education, and adoption of agentic systems.
-- **Non-profit and non-commercial.** This initiative supports education, awareness, research, standards, and interoperability. It does not own product delivery, customer deployments, billing, or monetized implementation logic.
-- **No database lock-in.** These are pure message contracts. There is no schema tied to SurrealDB, Postgres, or any other store. Persistence is the responsibility of each consuming service; Agent-Foundation only describes the shape of the data on the wire.
-- **Language-neutral.** Contracts are defined once in `.proto`. This repo ships the `.proto` source only — each consuming repo generates its own bindings in Python, TypeScript, Go, Rust, Java, or any other language supported by `buf` or `protoc`.
-- **Traceable by construction.** Evidence references sources, decisions reference evidence, artifacts and publications reference both. Nothing is asserted without provenance — _No evidence without source. No strategic decision without evidence._
-- **Standards-aligned.** Contracts should interoperate with established open standards wherever possible instead of creating unnecessary proprietary concepts.
-- **Stable by default.** Breaking changes must move to a new version package. Existing versioned contracts should remain compatible for downstream consumers.
+To make agent education, awareness, research, standards, and interoperability openly accessible for the benefit of communities, learners, researchers, builders, institutions, and organizations.
+
+Agentic systems are becoming part of how people learn, work, build, decide, govern, and collaborate. Communities need open knowledge, shared vocabulary, responsible guidance, and interoperable foundations so they can understand and adopt these systems safely.
+
+Agent-Foundation exists to reduce confusion, fragmentation, and unequal access by publishing open educational material, shared terminology, research-grounded models, and portable contracts for the agent ecosystem.
 
 ## Scope
 
@@ -29,6 +27,9 @@ Agent-Foundation is responsible for:
 - Standards alignment.
 - Public-good documentation.
 - Cross-repository interoperability.
+- Provenance and traceability guidance.
+- Evaluation and benchmarking literacy.
+- Responsible adoption guidance.
 
 Agent-Foundation is not responsible for:
 
@@ -39,6 +40,48 @@ Agent-Foundation is not responsible for:
 - Billing, sales, or monetization.
 - Customer-specific deployments.
 - Proprietary implementation logic.
+
+## Principles
+
+- **Community welfare first.** Foundation work should improve public understanding, responsible adoption, and shared access to agent knowledge.
+- **Education before adoption.** People should be able to understand agentic systems before they are expected to use, govern, buy, or deploy them.
+- **Evidence before claims.** Important claims should be supported by evidence, sources, rationale, or clearly stated assumptions.
+- **Provenance by design.** Sources, evidence, decisions, evaluations, artifacts, theories, and publications should be traceable.
+- **Open standards before proprietary definitions.** Agent-Foundation should align with open standards wherever possible.
+- **Interoperability over lock-in.** Foundation contracts should work across languages, tools, agents, runtimes, and databases.
+- **Stability over novelty.** Shared contracts should be stable enough for other repositories and communities to depend on.
+- **Public good before commercial advantage.** Commercial product delivery, monetization, customer-specific implementation, and proprietary runtime behavior belong outside this repository.
+- **Transparency over opacity.** Definitions, decisions, trade-offs, limitations, and assumptions should be documented clearly.
+- **Responsible adoption over hype.** The foundation should support practical education, risk understanding, evaluation literacy, and community welfare.
+
+## Governance
+
+Agent-Foundation is authoritative for:
+
+- Foundation terminology used across AGenNext repositories.
+- Canonical language-neutral contracts.
+- Shared public-good education and awareness material.
+- Standards alignment notes.
+- Versioning and compatibility expectations for foundation contracts.
+- Public documentation explaining agent concepts, evidence, decisions, evaluation, provenance, and interoperability.
+
+Agent-Foundation is not authoritative for:
+
+- Commercial product roadmaps.
+- Customer-specific implementations.
+- Production runtime behavior.
+- User interface design.
+- Billing, packaging, sales, or monetization.
+- Proprietary deployment architecture.
+
+Changes should be reviewed against four questions:
+
+1. Does this support community welfare, education, awareness, research, standards, or interoperability?
+2. Is this a foundation contract or public-good artifact rather than product implementation?
+3. Is the terminology stable enough to be reused across repositories?
+4. Does the change preserve backward compatibility for existing versioned contracts?
+
+Breaking changes must not be introduced into an existing version package. Use a new package version such as `v2` when compatibility cannot be preserved.
 
 ## Contracts
 
