@@ -1,0 +1,79 @@
+syntax = "proto3";
+
+package agennext.foundation.v1;
+
+// Target repo: Agent-Research
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
+// SourceType classifies the origin of a piece of evidence.
+enum SourceType {
+  SOURCE_TYPE_UNSPECIFIED = 0;
+  SOURCE_TYPE_ACADEMIC_PAPER = 1;
+  SOURCE_TYPE_WEB_PAGE = 2;
+  SOURCE_TYPE_DATASET = 3;
+  SOURCE_TYPE_CODE_REPOSITORY = 4;
+  SOURCE_TYPE_BENCHMARK = 5;
+  SOURCE_TYPE_INTERNAL_DOCUMENT = 6;
+  SOURCE_TYPE_HUMAN_EXPERT = 7;
+  SOURCE_TYPE_VECTOR_STORE = 8;    // an embedding index queried via RAG
+  SOURCE_TYPE_RAG_RETRIEVAL = 9;   // a specific retrieval result set
+}
+
+// Freshness captures how current a source is relative to its use. A research
+// intelligence system must be able to reason about staleness, so freshness is
+// a first-class part of every source.
+message Freshness {
+  // The point in time the source is considered accurate as of.
+  google.protobuf.Timestamp as_of = 1;
+  // Staleness budget in seconds. Unset means no freshness constraint;
+  // `optional` lets consumers distinguish "no budget" from a budget of 0.
+  optional int64 max_age_seconds = 2 [(buf.validate.field).int64.gte = 0];
+  // Whether the source is currently considered stale against its budget.
+  // Unset means staleness has not been evaluated.
+  optional bool stale = 3;
+}
+
+// Source is the traceable origin of evidence.
+//
+// Core principle: "No evidence without source." Every Evidence message must
+// reference at least one Source so that any downstream synthesis, decision, or
+// artifact can be traced back to where it came from.
+message Source {
+  string id = 1;
+  SourceType type = 2;
+  // Canonical locator: URL, DOI, arXiv id, file path, etc.
+  string uri = 3 [(buf.validate.field).string.min_len = 1];
+  string title = 4;
+  string publisher = 5;
+  google.protobuf.Timestamp published_at = 6;
+  google.protobuf.Timestamp retrieved_at = 7;
+  // Content hash for integrity verification and deduplication.
+  string content_hash = 8;
+  Freshness freshness = 9;
+  // Digital Object Identifier, when the source has one (CSL/DOI alignment).
+  string doi = 10;
+}
+
+// RetrievedChunk is one passage returned by a RAG retrieval, traceable to the
+// Source it came from.
+message RetrievedChunk {
+  // References Source.id of the underlying document.
+  string source_id = 1;
+  string content = 2;
+  // Similarity/relevance score, normalized 0..1.
+  double score = 3 [(buf.validate.field).double = {gte: 0, lte: 1}];
+}
+
+// Retrieval captures a RAG query and its results so any evidence grounded in
+// retrieval remains traceable: which index, which query, which chunks.
+message Retrieval {
+  string id = 1;
+  string query = 2;
+  // Vector store / index name that was queried.
+  string index = 3;
+  int32 top_k = 4 [(buf.validate.field).int32.gte = 0];
+  repeated RetrievedChunk chunks = 5;
+  google.protobuf.Timestamp retrieved_at = 6;
+}

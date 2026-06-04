@@ -1,0 +1,15 @@
+version: v2
+# Generate the Agent-Foundation contract SDK for Agent-Platform.
+# Run from this folder:  buf generate buf.build/agennext/agent-foundation
+# (or point at a local checkout of the Agent-Foundation `proto/` module).
+managed:
+  enabled: true
+plugins:
+  - remote: buf.build/protocolbuffers/python
+    out: gen/python
+  - remote: buf.build/protocolbuffers/pyi
+    out: gen/python
+  - remote: buf.build/bufbuild/es
+    out: gen/ts
+    opt:
+      - target=ts

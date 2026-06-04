@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package agennext.foundation.v1;
+
+// Target repo: Agent-Research
+
+import "agennext/foundation/v1/provenance.proto";
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
+// Confidence expresses how strongly a claim is supported, normalized to 0..1.
+message Confidence {
+  double score = 1 [(buf.validate.field).double = {gte: 0, lte: 1}];
+  string rationale = 2;
+}
+
+// Evidence is a single claim grounded in one or more sources.
+//
+// Core principle: "No evidence without source." `source_ids` is required to be
+// non-empty; each id references a Source.id defined in source.proto.
+message Evidence {
+  string id = 1;
+  string claim = 2 [(buf.validate.field).string.min_len = 1];
+  repeated string source_ids = 3 [(buf.validate.field).repeated.min_items = 1];
+  Confidence confidence = 4;
+  repeated string tags = 5;
+  google.protobuf.Timestamp created_at = 6;
+  Provenance provenance = 7;
+}
+
+// Synthesis combines multiple pieces of evidence into a finding that answers a
+// research question. It is the bridge in the question -> evidence -> synthesis
+// -> decision loop.
+message Synthesis {
+  string id = 1;
+  string question = 2 [(buf.validate.field).string.min_len = 1];
+  repeated string evidence_ids = 3 [(buf.validate.field).repeated.min_items = 1];
+  string finding = 4;
+  Confidence confidence = 5;
+  google.protobuf.Timestamp created_at = 6;
+  Provenance provenance = 7;
+}

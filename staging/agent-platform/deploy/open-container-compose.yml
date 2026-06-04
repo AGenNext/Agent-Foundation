@@ -1,0 +1,32 @@
+# Local runtime for Agent-Platform. Cluster deploys use Helm (TODO: deploy/helm).
+# Naming mirrors Agent-Platform's existing open-container-compose.yml convention.
+services:
+  surrealdb:
+    image: surrealdb/surrealdb:latest
+    command: start --log info --user root --pass root rocksdb:/data/agent.db
+    ports:
+      - "8000:8000"
+    volumes:
+      - surreal-data:/data
+
+  opa:
+    image: openpolicyagent/opa:latest
+    command: run --server --addr :8181 /policy
+    ports:
+      - "8181:8181"
+    volumes:
+      - ../policy:/policy:ro
+
+  platform:
+    build: ..
+    depends_on:
+      - surrealdb
+      - opa
+    environment:
+      SURREALDB_URL: "ws://surrealdb:8000"
+      OPA_URL: "http://opa:8181"
+    ports:
+      - "3000:3000"
+
+volumes:
+  surreal-data:

@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package agennext.foundation.v1;
+
+// Target repo: Agent-Theories
+
+import "google/protobuf/timestamp.proto";
+
+// TheoryStatus mirrors the status labels used by the Agent-Theories registry,
+// supporting both tested and untested theories with clear labeling.
+enum TheoryStatus {
+  THEORY_STATUS_UNSPECIFIED = 0;
+  THEORY_STATUS_TESTED = 1;
+  THEORY_STATUS_PARTIALLY_TESTED = 2;
+  THEORY_STATUS_UNTESTED = 3;
+  THEORY_STATUS_DISPUTED = 4;
+  THEORY_STATUS_DEPRECATED = 5;
+}
+
+// Theory is a registry entry describing a real-world theory across any
+// discipline. It is the contract behind the Agent-Theories registry: a theory
+// can be loaded, evaluated (see evaluation.proto), and referenced by evidence
+// and decisions.
+message Theory {
+  string id = 1;
+  string name = 2;
+  // Discipline or category, e.g. "ai-agents", "systems", "economics".
+  string discipline = 3;
+  string summary = 4;
+  TheoryStatus status = 5;
+  // Sources grounding the theory; references Source.id.
+  repeated string source_ids = 6;
+  repeated string tags = 7;
+  google.protobuf.Timestamp updated_at = 8;
+}

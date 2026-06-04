@@ -1,0 +1,44 @@
+name: ci
+
+# Runs on an ephemeral, on-demand runner: GitHub spins up a fresh container
+# for each push/PR and discards it when the job finishes. This is the
+# disposable test runtime for the contract layer.
+#
+# buf is installed directly (not via a third-party setup action) so the
+# workflow only depends on GitHub-authored actions, satisfying org Actions
+# allowlists. To run these checks on AGenNext's own runtime instead, swap
+# `runs-on` for a self-hosted label backed by agent-test-container.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  BUF_VERSION: "1.50.0"
+
+jobs:
+  buf:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Full history so `buf breaking` can diff against the base branch.
+          fetch-depth: 0
+      - name: Install buf
+        run: |
+          curl -fsSL "https://github.com/bufbuild/buf/releases/download/v${BUF_VERSION}/buf-Linux-x86_64" \
+            -o /usr/local/bin/buf
+          chmod +x /usr/local/bin/buf
+          buf --version
+      - name: Resolve dependencies
+        run: buf dep update
+      - name: Lint contracts
+        run: buf lint
+      - name: Check for breaking changes
+        # Compare the PR against the tip of main. Skipped on pushes to main,
+        # where there is no upstream base to diff against.
+        if: github.event_name == 'pull_request'
+        run: buf breaking --against "https://github.com/${{ github.repository }}.git#branch=${{ github.event.pull_request.base.ref }}"

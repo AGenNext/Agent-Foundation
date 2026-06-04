@@ -1,0 +1,105 @@
+syntax = "proto3";
+
+package agennext.foundation.v1;
+
+// Target repo: Agent-Platform
+
+// Agent contracts. Agent-Foundation only *defines* these; Agent-Platform is the
+// layer that implements and enforces them at runtime.
+
+// ModelProvider identifies an LLM backend. The set is open via OTHER so new
+// providers don't require a contract change.
+enum ModelProvider {
+  MODEL_PROVIDER_UNSPECIFIED = 0;
+  MODEL_PROVIDER_ANTHROPIC = 1;
+  MODEL_PROVIDER_OPENAI = 2;
+  MODEL_PROVIDER_GOOGLE = 3;
+  MODEL_PROVIDER_AZURE_OPENAI = 4;
+  MODEL_PROVIDER_AWS_BEDROCK = 5;
+  MODEL_PROVIDER_LOCAL = 6;
+  MODEL_PROVIDER_OTHER = 7;
+}
+
+// ModelRef points at one concrete model.
+message ModelRef {
+  ModelProvider provider = 1;
+  // Provider-native model id, e.g. "claude-opus-4-8".
+  string model = 2;
+  // OpenAI-compatible base URL; optional, for self-hosted/proxied endpoints.
+  string endpoint = 3;
+}
+
+// ModelRouting gives an agent multi-LLM support: a primary model with ordered
+// fallbacks tried on failure or budget exhaustion.
+message ModelRouting {
+  ModelRef primary = 1;
+  repeated ModelRef fallbacks = 2;
+}
+
+// ToolProtocol is the wire standard a tool binding speaks.
+enum ToolProtocol {
+  TOOL_PROTOCOL_UNSPECIFIED = 0;
+  TOOL_PROTOCOL_MCP = 1;      // Model Context Protocol
+  TOOL_PROTOCOL_OPENAPI = 2;  // OpenAPI/REST
+  TOOL_PROTOCOL_A2A = 3;      // another agent, via Agent2Agent
+}
+
+// ToolBinding attaches an external capability to an agent.
+message ToolBinding {
+  ToolProtocol protocol = 1;
+  // MCP server URL, OpenAPI spec URL, or A2A agent URL.
+  string uri = 2;
+  string name = 3;
+}
+
+// --- A2A-aligned Agent Card -------------------------------------------------
+
+// AgentSkill mirrors an A2A AgentCard skill entry.
+message AgentSkill {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  repeated string tags = 4;
+  repeated string examples = 5;
+}
+
+// AgentProvider is the organization publishing the agent (A2A provider).
+message AgentProvider {
+  string organization = 1;
+  string url = 2;
+}
+
+// AgentCapabilities advertises optional A2A protocol features.
+message AgentCapabilities {
+  bool streaming = 1;
+  bool push_notifications = 2;
+  bool state_transition_history = 3;
+}
+
+// AgentCard is the public, discoverable description of an agent, aligned with
+// the Agent2Agent (A2A) AgentCard. It is what an agent advertises so other
+// agents and clients can discover and call it.
+message AgentCard {
+  string name = 1;
+  string description = 2;
+  // Base URL where the agent is served (the A2A endpoint).
+  string url = 3;
+  string version = 4;
+  AgentProvider provider = 5;
+  AgentCapabilities capabilities = 6;
+  // Accepted/produced content modes (e.g. "text/plain", "application/json").
+  repeated string default_input_modes = 7;
+  repeated string default_output_modes = 8;
+  repeated AgentSkill skills = 9;
+}
+
+// Agent binds a public AgentCard to the concrete model routing, tools, and
+// runtime that fulfill it.
+message Agent {
+  string id = 1;
+  AgentCard card = 2;
+  ModelRouting models = 3;
+  repeated ToolBinding tools = 4;
+  // References RuntimeSpec.id in runtime.proto.
+  string runtime_id = 5;
+}

@@ -1,0 +1,7 @@
+# buf
+buf.lock
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/

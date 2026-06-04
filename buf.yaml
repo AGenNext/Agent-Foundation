@@ -1,0 +1,12 @@
+version: v2
+modules:
+  - path: proto
+deps:
+  # CEL-based field/message validation rules (protovalidate annotations).
+  - buf.build/bufbuild/protovalidate
+lint:
+  use:
+    - STANDARD
+breaking:
+  use:
+    - FILE
