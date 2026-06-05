@@ -8,13 +8,16 @@ import "agennext/foundation/v1/provenance.proto";
 import "buf/validate/validate.proto";
 import "google/protobuf/timestamp.proto";
 
-// DecisionType is the class of strategic decision being made.
+// DecisionType is the class of strategic or operational decision being made.
 enum DecisionType {
   DECISION_TYPE_UNSPECIFIED = 0;
   DECISION_TYPE_PRODUCT = 1;
   DECISION_TYPE_TECHNICAL = 2;
   DECISION_TYPE_MARKET = 3;
   DECISION_TYPE_ARCHITECTURE = 4;
+  DECISION_TYPE_OPERATIONAL = 5;
+  DECISION_TYPE_GOVERNANCE = 6;
+  DECISION_TYPE_AGENT_ACTION = 7;
 }
 
 // DecisionStatus tracks the lifecycle of a decision record.
@@ -24,38 +27,91 @@ enum DecisionStatus {
   DECISION_STATUS_ACCEPTED = 2;
   DECISION_STATUS_REJECTED = 3;
   DECISION_STATUS_SUPERSEDED = 4;
+  DECISION_STATUS_REVIEW_REQUIRED = 5;
+  DECISION_STATUS_EXECUTED = 6;
 }
 
-// Alternative is an option that was considered and not chosen.
+// ConstraintKind classifies the kind of boundary that shaped a decision.
+enum ConstraintKind {
+  CONSTRAINT_KIND_UNSPECIFIED = 0;
+  CONSTRAINT_KIND_POLICY = 1;
+  CONSTRAINT_KIND_SECURITY = 2;
+  CONSTRAINT_KIND_PRIVACY = 3;
+  CONSTRAINT_KIND_COST = 4;
+  CONSTRAINT_KIND_TIME = 5;
+  CONSTRAINT_KIND_QUALITY = 6;
+  CONSTRAINT_KIND_COMPLIANCE = 7;
+  CONSTRAINT_KIND_HUMAN_APPROVAL = 8;
+}
+
+// Objective describes the goal the actor is trying to satisfy.
+message Objective {
+  string id = 1;
+  string statement = 2;
+  string owner_identity_id = 3;
+  string success_criteria = 4;
+}
+
+// Constraint describes a rule, boundary, or condition that affects a decision.
+message Constraint {
+  string id = 1;
+  ConstraintKind kind = 2;
+  string statement = 3;
+  string source_ref = 4;
+  bool mandatory = 5;
+}
+
+// Approval records human, policy, or authority approval for a decision.
+message Approval {
+  string id = 1;
+  string approver_identity_id = 2;
+  string approver_kind = 3;
+  string status = 4;
+  string reason = 5;
+  google.protobuf.Timestamp approved_at = 6;
+}
+
+// Alternative is an option that was considered.
 message Alternative {
-  string summary = 1;
-  string rejected_reason = 2;
+  string id = 1;
+  string summary = 2;
+  string rejected_reason = 3;
+  repeated string expected_benefits = 4;
+  repeated string expected_risks = 5;
+  double estimated_cost = 6;
+  double confidence = 7;
+  bool selected = 8;
 }
 
-// Decision is a strategic choice grounded in evidence and synthesis.
+// Decision is a strategic or operational choice grounded in evidence,
+// constraints, rationale, approvals, and provenance.
 //
-// Core principle: "No strategic decision without evidence." At least one of
+// Core principle: "No meaningful decision without evidence." At least one of
 // `synthesis_ids` or `evidence_ids` must be populated so the decision is
 // traceable back to sources.
 message Decision {
-  // Core principle, enforced: a decision must be traceable to at least one
-  // synthesis or piece of evidence.
   option (buf.validate.message).cel = {
-    id: "decision.grounded",
-    message: "a decision must cite at least one synthesis_id or evidence_id",
+    id: "decision.grounded"
+    message: "a decision must cite at least one synthesis_id or evidence_id"
     expression: "size(this.synthesis_ids) > 0 || size(this.evidence_ids) > 0"
   };
 
   string id = 1;
   DecisionType type = 2;
-  string question = 3;
-  string outcome = 4;
-  repeated string synthesis_ids = 5;
-  repeated string evidence_ids = 6;
-  repeated Alternative alternatives = 7;
-  DecisionStatus status = 8;
-  // Set when status is SUPERSEDED: the Decision.id that replaces this one.
-  string superseded_by = 9;
-  google.protobuf.Timestamp decided_at = 10;
-  Provenance provenance = 11;
+  string actor_identity_id = 3;
+  Objective objective = 4;
+  string question = 5;
+  string outcome = 6;
+  repeated string synthesis_ids = 7;
+  repeated string evidence_ids = 8;
+  repeated Constraint constraints = 9;
+  repeated Alternative alternatives = 10;
+  string selected_alternative_id = 11;
+  string rationale = 12;
+  repeated string policy_refs = 13;
+  repeated Approval approvals = 14;
+  DecisionStatus status = 15;
+  string superseded_by = 16;
+  google.protobuf.Timestamp decided_at = 17;
+  Provenance provenance = 18;
 }
