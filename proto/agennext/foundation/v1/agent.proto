@@ -20,6 +20,34 @@ enum ModelProvider {
   MODEL_PROVIDER_OTHER = 7;
 }
 
+// AgentLifecycleState describes whether an agent may operate.
+// Runtime repositories enforce these states; the foundation defines them.
+enum AgentLifecycleState {
+  AGENT_LIFECYCLE_STATE_UNSPECIFIED = 0;
+  AGENT_LIFECYCLE_STATE_DRAFT = 1;
+  AGENT_LIFECYCLE_STATE_ISSUED = 2;
+  AGENT_LIFECYCLE_STATE_ACTIVE = 3;
+  AGENT_LIFECYCLE_STATE_PROBATION = 4;
+  AGENT_LIFECYCLE_STATE_SUSPENDED = 5;
+  AGENT_LIFECYCLE_STATE_TERMINATED = 6;
+  AGENT_LIFECYCLE_STATE_ARCHIVED = 7;
+}
+
+// AgentActionType classifies the kind of external change an agent may attempt.
+enum AgentActionType {
+  AGENT_ACTION_TYPE_UNSPECIFIED = 0;
+  AGENT_ACTION_TYPE_READ = 1;
+  AGENT_ACTION_TYPE_WRITE = 2;
+  AGENT_ACTION_TYPE_SEND_MESSAGE = 3;
+  AGENT_ACTION_TYPE_CREATE_RESOURCE = 4;
+  AGENT_ACTION_TYPE_UPDATE_RESOURCE = 5;
+  AGENT_ACTION_TYPE_DELETE_RESOURCE = 6;
+  AGENT_ACTION_TYPE_PUBLISH_ARTIFACT = 7;
+  AGENT_ACTION_TYPE_REQUEST_PAYMENT = 8;
+  AGENT_ACTION_TYPE_DELEGATE_TO_AGENT = 9;
+  AGENT_ACTION_TYPE_ESCALATE_TO_HUMAN = 10;
+}
+
 // ModelRef points at one concrete model.
 message ModelRef {
   ModelProvider provider = 1;
@@ -50,6 +78,76 @@ message ToolBinding {
   // MCP server URL, OpenAPI spec URL, or A2A agent URL.
   string uri = 2;
   string name = 3;
+}
+
+// AgentIssuer identifies the authority that issued or authorized the agent.
+message AgentIssuer {
+  string id = 1;
+  string name = 2;
+  string url = 3;
+}
+
+// AgentCredential points to a verifiable credential, certificate, or signed
+// authorization record held by the agent identity.
+message AgentCredential {
+  string id = 1;
+  string type = 2;
+  string issuer_id = 3;
+  string subject_id = 4;
+  string uri = 5;
+  string issued_at = 6;
+  string expires_at = 7;
+  bool revoked = 8;
+}
+
+// CapabilityGrant says what an agent is allowed to do, under which policy.
+message CapabilityGrant {
+  string id = 1;
+  AgentActionType action_type = 2;
+  string resource = 3;
+  string scope = 4;
+  string policy_ref = 5;
+  bool human_approval_required = 6;
+}
+
+// AgentIdentity is the anchor of a real agent. It connects ownership,
+// authorization, credentials, permissions, lifecycle, and revocation.
+message AgentIdentity {
+  string id = 1;
+  AgentIssuer issuer = 2;
+  string owner_id = 3;
+  string subject_type = 4; // person, organization, system, community, or agent.
+  AgentLifecycleState lifecycle_state = 5;
+  repeated AgentCredential credentials = 6;
+  repeated CapabilityGrant capability_grants = 7;
+  double trust_score = 8;
+  bool revoked = 9;
+}
+
+// AgentAction records an intended or completed action attempted by an agent.
+message AgentAction {
+  string id = 1;
+  string agent_id = 2;
+  AgentActionType type = 3;
+  string target = 4;
+  string input_ref = 5;
+  string decision_ref = 6;
+  string policy_evaluation_ref = 7;
+  string approval_ref = 8;
+  string result_ref = 9;
+}
+
+// AgentAccountability binds an agent's identity to its evidence, decisions,
+// actions, outcomes, policy checks, approvals, and trace/provenance records.
+message AgentAccountability {
+  string agent_id = 1;
+  repeated string context_refs = 2;
+  repeated string decision_refs = 3;
+  repeated string action_refs = 4;
+  repeated string outcome_refs = 5;
+  repeated string provenance_refs = 6;
+  repeated string audit_refs = 7;
+  repeated string evaluation_refs = 8;
 }
 
 // --- A2A-aligned Agent Card -------------------------------------------------
@@ -93,13 +191,16 @@ message AgentCard {
   repeated AgentSkill skills = 9;
 }
 
-// Agent binds a public AgentCard to the concrete model routing, tools, and
-// runtime that fulfill it.
+// Agent binds a public AgentCard to identity, model routing, tools, runtime,
+// lifecycle, and accountability. This makes an agent more than a stateless
+// prompt or workflow.
 message Agent {
   string id = 1;
-  AgentCard card = 2;
-  ModelRouting models = 3;
-  repeated ToolBinding tools = 4;
+  AgentIdentity identity = 2;
+  AgentCard card = 3;
+  ModelRouting models = 4;
+  repeated ToolBinding tools = 5;
   // References RuntimeSpec.id in runtime.proto.
-  string runtime_id = 5;
+  string runtime_id = 6;
+  AgentAccountability accountability = 7;
 }
