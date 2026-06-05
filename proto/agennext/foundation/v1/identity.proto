@@ -1,0 +1,60 @@
+syntax = "proto3";
+
+package agennext.foundation.v1;
+
+// Identity contracts. Agent-Foundation defines portable identity primitives;
+// Agent-Identity and Agent-Platform implement issuance, verification, policy,
+// and enforcement.
+
+// ActorKind classifies who or what can hold identity in the ecosystem.
+enum ActorKind {
+  ACTOR_KIND_UNSPECIFIED = 0;
+  ACTOR_KIND_PERSON = 1;
+  ACTOR_KIND_ORGANIZATION = 2;
+  ACTOR_KIND_SYSTEM = 3;
+  ACTOR_KIND_AGENT = 4;
+  ACTOR_KIND_COMMUNITY = 5;
+}
+
+// LifecycleState applies to any identity-bearing actor, including agents.
+enum LifecycleState {
+  LIFECYCLE_STATE_UNSPECIFIED = 0;
+  LIFECYCLE_STATE_DRAFT = 1;
+  LIFECYCLE_STATE_ISSUED = 2;
+  LIFECYCLE_STATE_ACTIVE = 3;
+  LIFECYCLE_STATE_PROBATION = 4;
+  LIFECYCLE_STATE_SUSPENDED = 5;
+  LIFECYCLE_STATE_TERMINATED = 6;
+  LIFECYCLE_STATE_ARCHIVED = 7;
+}
+
+// Issuer identifies the authority that issued or authorized an identity.
+message Issuer {
+  string id = 1;
+  string name = 2;
+  string url = 3;
+}
+
+// Credential points to a verifiable credential, certificate, signed assertion,
+// or authorization record held by an identity.
+message Credential {
+  string id = 1;
+  string type = 2;
+  string issuer_id = 3;
+  string subject_id = 4;
+  string uri = 5;
+  string issued_at = 6;
+  string expires_at = 7;
+  bool revoked = 8;
+}
+
+// Identity is the anchor that connects past, present, and future for any actor.
+message Identity {
+  string id = 1;
+  ActorKind kind = 2;
+  Issuer issuer = 3;
+  string owner_id = 4;
+  LifecycleState lifecycle_state = 5;
+  repeated Credential credentials = 6;
+  bool revoked = 7;
+}
