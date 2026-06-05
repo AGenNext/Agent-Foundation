@@ -1,0 +1,95 @@
+syntax = "proto3";
+
+package agennext.foundation.v1;
+
+// Target repos: Agent-Platform, Agent-Ops, Agent-Trust
+
+import "agennext/foundation/v1/provenance.proto";
+import "google/protobuf/timestamp.proto";
+
+// ActionKind classifies the kind of change an actor may attempt.
+enum ActionKind {
+  ACTION_KIND_UNSPECIFIED = 0;
+  ACTION_KIND_READ = 1;
+  ACTION_KIND_WRITE = 2;
+  ACTION_KIND_SEND_MESSAGE = 3;
+  ACTION_KIND_CREATE_RESOURCE = 4;
+  ACTION_KIND_UPDATE_RESOURCE = 5;
+  ACTION_KIND_DELETE_RESOURCE = 6;
+  ACTION_KIND_PUBLISH_ARTIFACT = 7;
+  ACTION_KIND_REQUEST_PAYMENT = 8;
+  ACTION_KIND_DELEGATE_TO_AGENT = 9;
+  ACTION_KIND_ESCALATE_TO_HUMAN = 10;
+  ACTION_KIND_EXECUTE_TOOL = 11;
+  ACTION_KIND_CALL_API = 12;
+}
+
+// ActionStatus tracks whether an action is proposed, approved, executed,
+// failed, rolled back, blocked, or under review.
+enum ActionStatus {
+  ACTION_STATUS_UNSPECIFIED = 0;
+  ACTION_STATUS_PROPOSED = 1;
+  ACTION_STATUS_APPROVED = 2;
+  ACTION_STATUS_REJECTED = 3;
+  ACTION_STATUS_EXECUTING = 4;
+  ACTION_STATUS_SUCCEEDED = 5;
+  ACTION_STATUS_FAILED = 6;
+  ACTION_STATUS_ROLLED_BACK = 7;
+  ACTION_STATUS_BLOCKED_BY_POLICY = 8;
+  ACTION_STATUS_REVIEW_REQUIRED = 9;
+}
+
+// ActionRiskLevel communicates how much governance pressure an action needs.
+enum ActionRiskLevel {
+  ACTION_RISK_LEVEL_UNSPECIFIED = 0;
+  ACTION_RISK_LEVEL_LOW = 1;
+  ACTION_RISK_LEVEL_MEDIUM = 2;
+  ACTION_RISK_LEVEL_HIGH = 3;
+  ACTION_RISK_LEVEL_CRITICAL = 4;
+}
+
+// ActionRequest is the intended change before execution.
+message ActionRequest {
+  string id = 1;
+  string actor_identity_id = 2;
+  string decision_id = 3;
+  ActionKind kind = 4;
+  string target = 5;
+  string target_type = 6;
+  string input_ref = 7;
+  repeated string capability_grant_ids = 8;
+  repeated string policy_refs = 9;
+  string approval_ref = 10;
+  ActionRiskLevel risk_level = 11;
+  google.protobuf.Timestamp requested_at = 12;
+}
+
+// ActionResult is the observable result after execution.
+message ActionResult {
+  string id = 1;
+  string action_request_id = 2;
+  ActionStatus status = 3;
+  string output_ref = 4;
+  string error_message = 5;
+  string external_operation_id = 6;
+  google.protobuf.Timestamp started_at = 7;
+  google.protobuf.Timestamp completed_at = 8;
+}
+
+// RollbackPlan defines how an action may be reversed or compensated.
+message RollbackPlan {
+  string id = 1;
+  string action_request_id = 2;
+  bool reversible = 3;
+  string rollback_action_ref = 4;
+  string compensation_strategy = 5;
+}
+
+// Action binds request, result, rollback, and provenance into one auditable unit.
+message Action {
+  string id = 1;
+  ActionRequest request = 2;
+  ActionResult result = 3;
+  RollbackPlan rollback_plan = 4;
+  Provenance provenance = 5;
+}
