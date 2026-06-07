@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package agennext.foundation.v1;
+
+option go_package = "github.com/AGenNext/Agent-Foundation/gen/go/agennext/foundation/v1;foundationv1";
+
+// Canonical repository registry for Operator Agents
+message CanonicalRepo {
+  string name = 1;
+  string repository = 2;
+  CanonicalRepoRole role = 3;
+}
+
+enum CanonicalRepoRole {
+  CANONICAL_REPO_ROLE_UNSPECIFIED = 0;
+  CANONICAL_REPO_ROLE_OPERATOR_AGENTS = 1;
+}
+
+// Registry containing all canonical repositories
+message CanonicalRepoRegistry {
+  repeated CanonicalRepo repos = 1;
+}
+
+// Example registry instance for Operator Agents
+message OperatorAgentsRepo {
+  CanonicalRepo repo = 1;
+}

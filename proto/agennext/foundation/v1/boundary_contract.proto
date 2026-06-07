@@ -1,0 +1,103 @@
+syntax = "proto3";
+
+package agennext.foundation.v1;
+
+import "google/protobuf/timestamp.proto";
+
+// BoundaryKind defines the type of boundary being declared.
+enum BoundaryKind {
+  BOUNDARY_KIND_UNSPECIFIED = 0;
+  BOUNDARY_KIND_ORGANIZATION = 1;
+  BOUNDARY_KIND_PLATFORM = 2;
+  BOUNDARY_KIND_DOMAIN = 3;
+  BOUNDARY_KIND_RUNTIME = 4;
+  BOUNDARY_KIND_AGENT = 5;
+  BOUNDARY_KIND_BLUEPRINT = 6;
+  BOUNDARY_KIND_SERVICE = 7;
+  BOUNDARY_KIND_PARTNER = 8;
+  BOUNDARY_KIND_PROVIDER = 9;
+  BOUNDARY_KIND_DATA = 10;
+}
+
+// ContractKind defines the type of agreement or operational contract.
+enum ContractKind {
+  CONTRACT_KIND_UNSPECIFIED = 0;
+  CONTRACT_KIND_PLATFORM = 1;
+  CONTRACT_KIND_SERVICE = 2;
+  CONTRACT_KIND_AGENT = 3;
+  CONTRACT_KIND_BLUEPRINT = 4;
+  CONTRACT_KIND_RUNTIME = 5;
+  CONTRACT_KIND_PARTNER = 6;
+  CONTRACT_KIND_PROVIDER = 7;
+  CONTRACT_KIND_DATA = 8;
+  CONTRACT_KIND_ARTIFACT = 9;
+}
+
+// Boundary defines the scope and interaction limits for an entity.
+message Boundary {
+  string id = 1;
+  string name = 2;
+  BoundaryKind kind = 3;
+  string owner = 4;
+  string purpose = 5;
+  repeated string includes = 6;
+  repeated string excludes = 7;
+  repeated string allowed_interactions = 8;
+  repeated string denied_interactions = 9;
+  repeated string constraints = 10;
+  repeated string evidence_requirements = 11;
+  repeated string authority_requirements = 12;
+  repeated string reconciliation_requirements = 13;
+  google.protobuf.Timestamp created_at = 14;
+  google.protobuf.Timestamp updated_at = 15;
+}
+
+// Contract defines obligations, permissions, guarantees, and proof requirements.
+message Contract {
+  string id = 1;
+  string name = 2;
+  ContractKind kind = 3;
+  string owner = 4;
+  string counterparty = 5;
+  string boundary_id = 6;
+  string purpose = 7;
+  repeated string inputs = 8;
+  repeated string outputs = 9;
+  repeated string obligations = 10;
+  repeated string permissions = 11;
+  repeated string guarantees = 12;
+  repeated string constraints = 13;
+  repeated string evidence_requirements = 14;
+  repeated string validation_requirements = 15;
+  repeated string reconciliation_requirements = 16;
+  repeated string human_accountability_requirements = 17;
+  ContractStatus status = 18;
+  google.protobuf.Timestamp valid_from = 19;
+  google.protobuf.Timestamp valid_until = 20;
+}
+
+// ContractStatus defines contract lifecycle.
+enum ContractStatus {
+  CONTRACT_STATUS_UNSPECIFIED = 0;
+  CONTRACT_STATUS_DRAFT = 1;
+  CONTRACT_STATUS_PROPOSED = 2;
+  CONTRACT_STATUS_VALIDATED = 3;
+  CONTRACT_STATUS_APPROVED = 4;
+  CONTRACT_STATUS_ACTIVE = 5;
+  CONTRACT_STATUS_CHALLENGED = 6;
+  CONTRACT_STATUS_SUSPENDED = 7;
+  CONTRACT_STATUS_SUPERSEDED = 8;
+  CONTRACT_STATUS_RETIRED = 9;
+  CONTRACT_STATUS_ARCHIVED = 10;
+}
+
+// BoundaryContractBinding binds a contract to one or more boundaries.
+message BoundaryContractBinding {
+  string id = 1;
+  string contract_id = 2;
+  repeated string boundary_ids = 3;
+  repeated string governed_entities = 4;
+  repeated string constraints = 5;
+  repeated string evidence = 6;
+  google.protobuf.Timestamp bound_at = 7;
+}
